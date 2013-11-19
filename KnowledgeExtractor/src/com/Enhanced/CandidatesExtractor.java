@@ -9,288 +9,291 @@ import com.Entity.CandidatesNQ;
 import com.common.oesLog;
 
 public class CandidatesExtractor {
-	private SentenceStructure sentenceST;
-	private int nowWordIdx, nowMorpIdx, findWordIdx, findMorpIdx;	
-	private Word nowWord; Morpheme nowMorpheme;
+        private SentenceStructure sentenceST;
+        private int nowWordIdx, nowMorpIdx, findWordIdx, findMorpIdx;        
+        private Word nowWord; Morpheme nowMorpheme;
 
 
-	public CandidatesExtractor() {
-		super();
-	}
+        public CandidatesExtractor() {
+                super();
+        }
 
-	public CandidatesExtractor(SentenceStructure ST) {
-		super();
-		this.sentenceST = ST;
+        public CandidatesExtractor(SentenceStructure ST) {
+                super();
+                this.sentenceST = ST;
 
-	}
-
-
-	/**
-	 * �߾��� �ĺ� ����
-	 * - �̸�, ��å ����[�±ױ���]
-	 * - �� ���忡�� ���� �ĺ�������
-	 * - �̸�, ��å���� �����Ǵ� �ܾ� ����[�̸� �Ǵ� ��å�������� �� �� Ž��]
-	 **/
-	public ArrayList<CandidatesNQ> S_CandidatesExtract( ArrayList<CandidatesNQ> candidatesNQarr){
-		nowWordIdx = this.sentenceST.getSentenceStructure().size()-1;//������ �ε��� ������ Ž��
-		for(;nowWordIdx>=0;nowWordIdx--){//����[����] ���� Ž��
-			nowWord = this.sentenceST.getSentenceStructure().get(nowWordIdx);
-			nowMorpIdx = nowWord.getWord().size()-1;
-			for(;nowMorpIdx>=0;nowMorpIdx--){//���¼� ���� Ž��
-				nowMorpheme = nowWord.getWord().get(nowMorpIdx);
-
-				//�̸�Ž��
-				if(nowMorpheme.getTag().equals("nq")&&nowMorpheme.getCharacter().length()>=2&&nowMorpheme.getCharacter().length()<=4){
-					candidatesNQarr = serchName_Job(candidatesNQarr);
-				}
-
-			}	
-		}
-
-		return candidatesNQarr;
-	}
-
-	/**�̸��� �������� S�ĺ� ����**/
-	public ArrayList<CandidatesNQ> serchName_Job(ArrayList<CandidatesNQ> candidatesNQarr){
+        }
 
 
-		boolean findFlag=false;
+        /**
+         * 발언자 후보 추출
+         * - 이름, 직책 추출[태그기반]
+         * - 현 문장에서 기존 후보군으로
+         * - 이름, 직책으로 추정되는 단어 추출[이름 또는 직책기준으로 앞 뒤 탐색]
+         **/
+        public ArrayList<CandidatesNQ> S_CandidatesExtract( ArrayList<CandidatesNQ> candidatesNQarr){
+                nowWordIdx = this.sentenceST.getSentenceStructure().size()-1;//마지막 인덱스 역방향 탐색
+                for(;nowWordIdx>=0;nowWordIdx--){//워드[어절] 단위 탐색
+                        nowWord = this.sentenceST.getSentenceStructure().get(nowWordIdx);
+                        nowMorpIdx = nowWord.getWord().size()-1;
+                        for(;nowMorpIdx>=0;nowMorpIdx--){//형태소 단위 탐색
+                                nowMorpheme = nowWord.getWord().get(nowMorpIdx);
+
+                                //이름탐색
+                                if(nowMorpheme.getTag().equals("nq")&&nowMorpheme.getCharacter().length()>=2&&nowMorpheme.getCharacter().length()<=4){
+                                        candidatesNQarr = serchName_Job(candidatesNQarr);
+                                }
+
+                        }        
+                }
+
+                return candidatesNQarr;
+        }
+
+        /**이름을 바탕으로 S후보 추출**/
+        public ArrayList<CandidatesNQ> serchName_Job(ArrayList<CandidatesNQ> candidatesNQarr){
 
 
-		/***
-		 * ��+���¼�+�� Ȯ��[morp����] 
-		 * -> �̸��� ��å�� �������� �پ��ִ����̽�
-		 * -> �Ӵ����� ���� ���̽� ������ ���� ���µ�
-		 * -> �� ������ ����
-		 * �� ���¼� �� Ȯ��[word����] 
-		 * -> �ڱ��� ������ ���� ���̽��� �ڱ������� �̸��� ���ϵǾ� ������ �̵��ϵ� ��å�� ����
-		 * -> ��å�� ���� �̸�ó�� ���̷� �ڸ��� ���⶧���� �ϴ��� ���ϵ� �ֵ� �������� Ž��
-		 ***/
-		//���� ������ Ȯ��
-		findArr:for(int i=0; i < candidatesNQarr.size();i++){
-			if(candidatesNQarr.get(i).getName().equals(nowMorpheme.getCharacter())){
-				if(candidatesNQarr.get(i).getJob()==""){//job�� �Է� �ȵ��ְ� ������ �̸� Ž��
-					candidatesNQarr.remove(i);
-				}else{
-					findFlag = true;	
-				}
-				break findArr;
-			}
-		}
-
-		if(!findFlag){//���� �����Ϳ� ������ �߰�
-			CandidatesNQ cadidateData = new CandidatesNQ(nowMorpheme.getCharacter(), nowWord.getExpIdx());
-			cadidateData = findSeq(cadidateData);
-
-			candidatesNQarr.add(cadidateData);
-
-		}
-
-		return candidatesNQarr;
-	}
+                boolean findFlag=false;
 
 
-	public CandidatesNQ findSeq(CandidatesNQ cadidateData){
-		int prevWordIdx = nowWordIdx-1;
-		int prevMorpIdx;
-		int nextWordIdx = nowWordIdx+1;
-		int nextMorpIdx;
-		Word prevWord;
-		Word nextWord;
+                /***
+                 * 앞+형태소+뒤 확인[morp단위] 
+                 * -> 이름과 직책이 공백없이 붙어있는케이스
+                 * -> 朴대통령 같은 케이스 말고는 거의 없는듯
+                 * -> 이 방식은 보류
+                 * 앞 형태소 뒤 확인[word단위] 
+                 * -> 박근혜 대통령 같은 케이스를 박근혜라는 이름이 등록되어 있으면 미등록된 직책을 추출
+                 * -> 직책의 경우 이름처럼 길이로 자를수 없기때문에 일단은 등록된 애들 기준으로 탐색
+                 ***/
+                //기존 데이터 확인
+                findArr:for(int i=0; i < candidatesNQarr.size();i++){
+                        if(candidatesNQarr.get(i).getName().equals(nowMorpheme.getCharacter())){
+                                if(candidatesNQarr.get(i).getJob()==""){//job이 입력 안되있고 동일한 이름 탐색
+                                        candidatesNQarr.remove(i);
+                                }else{
+                                        findFlag = true;        
+                                }
+                                break findArr;
+                        }
+                }
 
-		if(prevWordIdx!=-1){
-			prevWord = this.sentenceST.getSentenceStructure().get(prevWordIdx);
-			prevMorpIdx = prevWord.getWord().size()-1;
-		}else {
-			prevWord = null;
-			prevMorpIdx=0;
-		}
+                if(!findFlag){//기존 데이터에 없으면 추가
+                        CandidatesNQ cadidateData = new CandidatesNQ(nowMorpheme.getCharacter(), nowWord.getExpIdx());
+                        cadidateData = findSeq(cadidateData);
 
-		if(nextWordIdx!=this.sentenceST.getSentenceStructure().size()){
-			nextWord = this.sentenceST.getSentenceStructure().get(nextWordIdx);
-			nextMorpIdx = nextWord.getWord().size()-1;
-		}else {
-			nextWord = null;
-			nextMorpIdx=0;
-		}
+                        candidatesNQarr.add(cadidateData);
 
-		/**prev now next**/
-		Morpheme prevMorpheme, nextMorpheme;
-		boolean loopFlag = false;
-		if(nextWord!=null){
-			MorphemeLoop:for(;nextMorpIdx>=0;nextMorpIdx--){
-				nextMorpheme = nextWord.getWord().get(nextMorpIdx);
-				if((nextMorpheme.getCharacter().equals("��")&&nextMorpheme.getTag().equals("jxc"))
-						||(nextMorpheme.getCharacter().equals("��")&&nextMorpheme.getTag().equals("jcs"))
-						||(nextMorpheme.getCharacter().equals("��")&&nextMorpheme.getTag().equals("jxc"))
-						||(nextMorpheme.getCharacter().equals("")&&nextMorpheme.getTag().equals(""))
-						){
-					loopFlag = true;
-				}
-				if(nextMorpheme.getTag().equals("ncr")){//Ž���� �ְ� ��å�̸�;
-					cadidateData.setJob(nextMorpheme.getCharacter());
-					break MorphemeLoop;
-					
-				}else if(nextMorpheme.getTag().equals("f")&&!loopFlag&&nextMorpheme.getCharacter().length()!=1){
-					cadidateData.setOrganization(nextMorpheme.getCharacter());
-					/**�Ҽ��� Ž���Ǿ����� ��å�� Ž�� �ȵǾ�����**/
-					if(cadidateData.getJob().equals("")&&(nextWordIdx+1)!=this.sentenceST.getSentenceStructure().size()){
-						/**�ι�° �ε��� Ž��**/
-						nextWordIdx++;
-						nextWord = this.sentenceST.getSentenceStructure().get(nextWordIdx);
-						nextMorpIdx = nextWord.getWord().size()-1;
-						for(;nextMorpIdx>=0;nextMorpIdx--){
-							nextMorpheme = nextWord.getWord().get(nextMorpIdx);
-							if(nextMorpheme.getTag().equals("ncr")){//Ž���� �ְ� �Ҽ��̸�;
-								cadidateData.setJob(nextMorpheme.getCharacter());
-								break MorphemeLoop;
-							}else if(((nextMorpheme.getCharacter().equals("��")&&nextMorpheme.getTag().equals("nbn")))&&
-									(nextWordIdx+1)!=this.sentenceST.getSentenceStructure().size()){
-								/**�ִ� 3��° �ε������� Ž��**/
-								nextWordIdx++;
-								nextWord = this.sentenceST.getSentenceStructure().get(nextWordIdx);
-								nextMorpIdx = nextWord.getWord().size()-1;
-								for(;nextMorpIdx>=0;nextMorpIdx--){
-									nextMorpheme = nextWord.getWord().get(nextMorpIdx);
-									if(nextMorpheme.getTag().equals("ncr")){
-										cadidateData.setJob(nextMorpheme.getCharacter());
-										break MorphemeLoop;
-									}
-								}
-							}
-						}
-					}else{
-						break MorphemeLoop;
-					}
-				}
+                }
 
-				/**��å, �Ҽ� ���� "��"�� ���� ������**/
-				else if((nextMorpheme.getCharacter().equals("��")&&nextMorpheme.getTag().equals("nbn"))&&
-						(nextWordIdx+1)!=this.sentenceST.getSentenceStructure().size()){//�� ������, �� �������� ���� ����ó��
-					nextWordIdx++;
-					nextWord = this.sentenceST.getSentenceStructure().get(nextWordIdx);
-					nextMorpIdx = nextWord.getWord().size()-1;
-					for(;nextMorpIdx>=0;nextMorpIdx--){
-						nextMorpheme = nextWord.getWord().get(nextMorpIdx);
-						if(nextMorpheme.getTag().equals("ncr")){//Ž���� �ְ� ��å�̸�;
+                return candidatesNQarr;
+        }
 
-							cadidateData.setJob(nextMorpheme.getCharacter());
-						
-							break MorphemeLoop;
-							
-						}else if(nextMorpheme.getTag().equals("f")&&nextMorpheme.getCharacter().length()!=1){
-							cadidateData.setOrganization(nextMorpheme.getCharacter());
-							/**�Ҽ��� Ž���Ǿ����� ��å�� Ž�� �ȵǾ�����**/
-							if(cadidateData.getJob().equals("")&&(nextWordIdx+1)!=this.sentenceST.getSentenceStructure().size()){
-								/**�ι�° �ε��� Ž��**/
-								nextWordIdx++;
-								nextWord = this.sentenceST.getSentenceStructure().get(nextWordIdx);
-								nextMorpIdx = nextWord.getWord().size()-1;
-								for(;nextMorpIdx>=0;nextMorpIdx--){
-									nextMorpheme = nextWord.getWord().get(nextMorpIdx);
-									if(nextMorpheme.getTag().equals("ncr")){//Ž���� �ְ� �Ҽ��̸�;
-										cadidateData.setJob(nextMorpheme.getCharacter());
-										break MorphemeLoop;
-									}
-								}
-							}else{
-								break MorphemeLoop;
-							}
-						}
-					}
-				}
-			}
-		}
 
-		
-		loopFlag = false;
-		if((cadidateData.getJob()==""||cadidateData.getOrganization()=="")&&prevWord!=null){
-			MorphemeLoop:for(;prevMorpIdx>=0;prevMorpIdx--){
-				prevMorpheme = prevWord.getWord().get(prevMorpIdx);
-				if((prevMorpheme.getCharacter().equals("��")&&prevMorpheme.getTag().equals("jxc"))
-						||(prevMorpheme.getCharacter().equals("��")&&prevMorpheme.getTag().equals("jcs"))
-						||(prevMorpheme.getCharacter().equals("��")&&prevMorpheme.getTag().equals("jxc"))
-						||(prevMorpheme.getCharacter().equals("")&&prevMorpheme.getTag().equals(""))
-						){
-					loopFlag = true;
-				}else if(prevMorpheme.getTag().equals("ncr")&&cadidateData.getJob()==""&&!loopFlag){//Ž���� �ְ� ��å�̸�;
-					cadidateData.setJob(prevMorpheme.getCharacter());
-					if(cadidateData.getOrganization().equals("")&&
-							(prevWordIdx-1)!=-1){//��å�� Ž���Ǿ����� �Ҽ� Ž�� �ȉ����� �ѹ� �� Ž��
-						/**�ι�° �ε��� Ž��**/
-						prevWordIdx--;
-						prevWord = this.sentenceST.getSentenceStructure().get(prevWordIdx);
-						prevMorpIdx = prevWord.getWord().size()-1;
-						for(;prevMorpIdx>=0;prevMorpIdx--){
-							prevMorpheme = prevWord.getWord().get(prevMorpIdx);
-							if(prevMorpheme.getTag().equals("f")&&prevMorpheme.getCharacter().length()!=1){//Ž���� �ְ� �Ҽ��̸�;
-								cadidateData.setOrganization(prevMorpheme.getCharacter());
-								break MorphemeLoop;
-							}else if(((prevMorpheme.getCharacter().equals("��")&&prevMorpheme.getTag().equals("nbn")))&&
-									(prevWordIdx-1)!=-1){
-								/**�ִ� 3��° �ε������� Ž��**/
-								prevWordIdx--;
-								prevWord = this.sentenceST.getSentenceStructure().get(prevWordIdx);
-								prevMorpIdx = prevWord.getWord().size()-1;
-								for(;prevMorpIdx>=0;prevMorpIdx--){
-									prevMorpheme = prevWord.getWord().get(prevMorpIdx);
-									if(prevMorpheme.getTag().equals("f")&&prevMorpheme.getCharacter().length()!=1){
-										cadidateData.setOrganization(prevMorpheme.getCharacter());
-										break MorphemeLoop;
-									}
-								}
-							}
-						}
-					}else{
-						break MorphemeLoop;
-					}
-				}else if(prevMorpheme.getTag().equals("f")&&cadidateData.getOrganization()==""&&!loopFlag&&prevMorpheme.getCharacter().length()!=1){
-					cadidateData.setOrganization(prevMorpheme.getCharacter());
-				
-					break MorphemeLoop;
-		
-				}else if((
-						((prevMorpheme.getCharacter().equals("��")&&prevMorpheme.getTag().equals("nbn"))||
-								(prevMorpheme.getCharacter().equals("�Ҽ�")&&prevMorpheme.getTag().equals("ncn")))
-								&&
-								(cadidateData.getOrganization()==""||cadidateData.getJob()==""))
-								&&(prevWordIdx-1)!=-1){
+        public CandidatesNQ findSeq(CandidatesNQ cadidateData){
+                int prevWordIdx = nowWordIdx-1;
+                int prevMorpIdx;
+                int nextWordIdx = nowWordIdx+1;
+                int nextMorpIdx;
+                Word prevWord;
+                Word nextWord;
 
-					prevWordIdx--;
-					prevWord = this.sentenceST.getSentenceStructure().get(prevWordIdx);
-					prevMorpIdx = prevWord.getWord().size()-1;
-					for(;prevMorpIdx>=0;prevMorpIdx--){
-						prevMorpheme = prevWord.getWord().get(prevMorpIdx);
-						if(prevMorpheme.getTag().equals("ncr")&&cadidateData.getJob()==""){//Ž���� �ְ� ��å�̸�;
+                if(prevWordIdx!=-1){
+                        prevWord = this.sentenceST.getSentenceStructure().get(prevWordIdx);
+                        prevMorpIdx = prevWord.getWord().size()-1;
+                }else {
+                        prevWord = null;
+                        prevMorpIdx=0;
+                }
 
-							cadidateData.setJob(prevMorpheme.getCharacter());
-							if(cadidateData.getOrganization().equals("")&&
-									(prevWordIdx-1)!=-1){//��å�� Ž���Ǿ����� �Ҽ� Ž�� �ȉ����� �ѹ� �� Ž��
-								/**�ι�° �ε��� Ž��**/
-								prevWordIdx--;
-								prevWord = this.sentenceST.getSentenceStructure().get(prevWordIdx);
-								prevMorpIdx = prevWord.getWord().size()-1;
-								for(;prevMorpIdx>=0;prevMorpIdx--){
-									prevMorpheme = prevWord.getWord().get(prevMorpIdx);
-									if(prevMorpheme.getTag().equals("f")&&prevMorpheme.getCharacter().length()!=1){//Ž���� �ְ� �Ҽ��̸�;
-										cadidateData.setOrganization(prevMorpheme.getCharacter());
-										break MorphemeLoop;
-									}
-								}
-							}else{
-								break MorphemeLoop;
-							}
-						}else if(prevMorpheme.getTag().equals("f")&&cadidateData.getOrganization()==""&&prevMorpheme.getCharacter().length()!=1){
-							cadidateData.setOrganization(prevMorpheme.getCharacter());
-						
-							break MorphemeLoop;
-							
-						}
-					}
-				}
-			}
-		}
+                if(nextWordIdx!=this.sentenceST.getSentenceStructure().size()){
+                        nextWord = this.sentenceST.getSentenceStructure().get(nextWordIdx);
+                        nextMorpIdx = nextWord.getWord().size()-1;
+                }else {
+                        nextWord = null;
+                        nextMorpIdx=0;
+                }
 
-		return cadidateData;
-	}
+                /**prev now next**/
+                Morpheme prevMorpheme, nextMorpheme;
+                boolean loopFlag = false;
+                if(nextWord!=null){
+                        MorphemeLoop:for(;nextMorpIdx>=0;nextMorpIdx--){
+                                nextMorpheme = nextWord.getWord().get(nextMorpIdx);
+                                if((nextMorpheme.getCharacter().equals("는")&&nextMorpheme.getTag().equals("jxc"))
+                                                ||(nextMorpheme.getCharacter().equals("가")&&nextMorpheme.getTag().equals("jcs"))
+                                                ||(nextMorpheme.getCharacter().equals("도")&&nextMorpheme.getTag().equals("jxc"))
+                                                ||(nextMorpheme.getCharacter().equals("")&&nextMorpheme.getTag().equals(""))
+                                                ){
+                                        loopFlag = true;
+                                }
+                                if(nextMorpheme.getTag().equals("ncr")){//탐색된 애가 직책이면;
+                                        cadidateData.setJob(nextMorpheme.getCharacter());
+                                         break MorphemeLoop;
+                                     
+                                }else if(nextMorpheme.getTag().equals("f")&&!loopFlag&&nextMorpheme.getCharacter().length()!=1){
+                                        cadidateData.setOrganization(nextMorpheme.getCharacter());
+                                        /**소속은 탐색되었지만 직책이 탐색 안되었으면**/
+                                        if(cadidateData.getJob().equals("")&&(nextWordIdx+1)!=this.sentenceST.getSentenceStructure().size()){
+                                                /**두번째 인덱스 탐색**/
+                                                nextWordIdx++;
+                                                nextWord = this.sentenceST.getSentenceStructure().get(nextWordIdx);
+                                                nextMorpIdx = nextWord.getWord().size()-1;
+                                                for(;nextMorpIdx>=0;nextMorpIdx--){
+                                                        nextMorpheme = nextWord.getWord().get(nextMorpIdx);
+                                                        if(nextMorpheme.getTag().equals("ncr")){//탐색된 애가 소속이면;
+                                                                cadidateData.setJob(nextMorpheme.getCharacter());
+                                                                break MorphemeLoop;
+                                                        }else if(((nextMorpheme.getCharacter().equals("전")&&nextMorpheme.getTag().equals("nbn")))&&
+                                                                        (nextWordIdx+1)!=this.sentenceST.getSentenceStructure().size()){
+                                                                /**최대 3번째 인덱스까지 탐색**/
+                                                                nextWordIdx++;
+                                                                nextWord = this.sentenceST.getSentenceStructure().get(nextWordIdx);
+                                                                nextMorpIdx = nextWord.getWord().size()-1;
+                                                                for(;nextMorpIdx>=0;nextMorpIdx--){
+                                                                        nextMorpheme = nextWord.getWord().get(nextMorpIdx);
+                                                                        if(nextMorpheme.getTag().equals("ncr")){
+                                                                                cadidateData.setJob(nextMorpheme.getCharacter());
+                                                                                break MorphemeLoop;
+                                                                        }
+                                                                }
+                                                        }
+                                                }
+                                        }else{
+                                                break MorphemeLoop;
+                                        }
+                                }
+
+                                /**직책, 소속 전에 "전"이 먼저 나오면**/
+                                else if((nextMorpheme.getCharacter().equals("전")&&nextMorpheme.getTag().equals("nbn"))&&
+                                                (nextWordIdx+1)!=this.sentenceST.getSentenceStructure().size()){//전 대통령, 전 국저원장 같은 예외처리
+                                        nextWordIdx++;
+                                        nextWord = this.sentenceST.getSentenceStructure().get(nextWordIdx);
+                                        nextMorpIdx = nextWord.getWord().size()-1;
+                                        for(;nextMorpIdx>=0;nextMorpIdx--){
+                                                nextMorpheme = nextWord.getWord().get(nextMorpIdx);
+                                                if(nextMorpheme.getTag().equals("ncr")){//탐색된 애가 직책이면;
+
+                                                        cadidateData.setJob(nextMorpheme.getCharacter());
+                                                        
+                                                         break MorphemeLoop;
+                                                        
+                                                }else if(nextMorpheme.getTag().equals("f")&&nextMorpheme.getCharacter().length()!=1){
+                                                        cadidateData.setOrganization(nextMorpheme.getCharacter());
+                                                        /**소속은 탐색되었지만 직책이 탐색 안되었으면**/
+                                                        if(cadidateData.getJob().equals("")&&(nextWordIdx+1)!=this.sentenceST.getSentenceStructure().size()){
+                                                                /**두번째 인덱스 탐색**/
+                                                                nextWordIdx++;
+                                                                nextWord = this.sentenceST.getSentenceStructure().get(nextWordIdx);
+                                                                nextMorpIdx = nextWord.getWord().size()-1;
+                                                                for(;nextMorpIdx>=0;nextMorpIdx--){
+                                                                        nextMorpheme = nextWord.getWord().get(nextMorpIdx);
+                                                                        if(nextMorpheme.getTag().equals("ncr")){//탐색된 애가 소속이면;
+                                                                                cadidateData.setJob(nextMorpheme.getCharacter());
+                                                                                break MorphemeLoop;
+                                                                        }
+                                                                }
+                                                        }else{
+                                                                break MorphemeLoop;
+                                                        }
+                                                }
+                                        }
+                                }
+                        }
+                }
+
+                
+                loopFlag = false;
+                if((cadidateData.getJob()==""||cadidateData.getOrganization()=="")&&prevWord!=null){
+                        MorphemeLoop:for(;prevMorpIdx>=0;prevMorpIdx--){
+                                prevMorpheme = prevWord.getWord().get(prevMorpIdx);
+                                if((prevMorpheme.getCharacter().equals("는")&&prevMorpheme.getTag().equals("jxc"))
+                                                ||(prevMorpheme.getCharacter().equals("가")&&prevMorpheme.getTag().equals("jcs"))
+                                                ||(prevMorpheme.getCharacter().equals("도")&&prevMorpheme.getTag().equals("jxc"))
+                                                ||(prevMorpheme.getCharacter().equals("")&&prevMorpheme.getTag().equals(""))
+                                                ){
+                                        loopFlag = true;
+                                }else if(prevMorpheme.getTag().equals("ncr")&&cadidateData.getJob()==""&&!loopFlag){//탐색된 애가 직책이면;
+                                        cadidateData.setJob(prevMorpheme.getCharacter());
+                                        if(cadidateData.getOrganization().equals("")&&
+                                                        (prevWordIdx-1)!=-1){//직책은 탐색되었지만 소속 탐색 안瑛만 한번 더 탐색
+                                                /**두번째 인덱스 탐색**/
+                                                prevWordIdx--;
+                                                prevWord = this.sentenceST.getSentenceStructure().get(prevWordIdx);
+                                                prevMorpIdx = prevWord.getWord().size()-1;
+                                                for(;prevMorpIdx>=0;prevMorpIdx--){
+                                                        prevMorpheme = prevWord.getWord().get(prevMorpIdx);
+                                                        if(prevMorpheme.getTag().equals("f")&&prevMorpheme.getCharacter().length()!=1){//탐색된 애가 소속이면;
+                                                                cadidateData.setOrganization(prevMorpheme.getCharacter());
+                                                                break MorphemeLoop;
+                                                        }else if(((prevMorpheme.getCharacter().equals("전")&&prevMorpheme.getTag().equals("nbn")))&&
+                                                                        (prevWordIdx-1)!=-1){
+                                                                /**최대 3번째 인덱스까지 탐색**/
+                                                                prevWordIdx--;
+                                                                prevWord = this.sentenceST.getSentenceStructure().get(prevWordIdx);
+                                                                prevMorpIdx = prevWord.getWord().size()-1;
+                                                                for(;prevMorpIdx>=0;prevMorpIdx--){
+                                                                        prevMorpheme = prevWord.getWord().get(prevMorpIdx);
+                                                                        if(prevMorpheme.getTag().equals("f")&&prevMorpheme.getCharacter().length()!=1){
+                                                                                cadidateData.setOrganization(prevMorpheme.getCharacter());
+                                                                                break MorphemeLoop;
+                                                                        }
+                                                                }
+                                                        }
+                                                }
+                                        }else{
+                                                break MorphemeLoop;
+                                        }
+                                }else if(prevMorpheme.getTag().equals("f")&&cadidateData.getOrganization()==""&&!loopFlag&&prevMorpheme.getCharacter().length()!=1){
+                                        cadidateData.setOrganization(prevMorpheme.getCharacter());
+                                        
+                                        break MorphemeLoop;
+                                      
+
+
+
+                                }else if((
+                                                ((prevMorpheme.getCharacter().equals("전")&&prevMorpheme.getTag().equals("nbn"))||
+                                                                (prevMorpheme.getCharacter().equals("소속")&&prevMorpheme.getTag().equals("ncn")))
+                                                                &&
+                                                                (cadidateData.getOrganization()==""||cadidateData.getJob()==""))
+                                                                &&(prevWordIdx-1)!=-1){
+
+                                        prevWordIdx--;
+                                        prevWord = this.sentenceST.getSentenceStructure().get(prevWordIdx);
+                                        prevMorpIdx = prevWord.getWord().size()-1;
+                                        for(;prevMorpIdx>=0;prevMorpIdx--){
+                                                prevMorpheme = prevWord.getWord().get(prevMorpIdx);
+                                                if(prevMorpheme.getTag().equals("ncr")&&cadidateData.getJob()==""){//탐색된 애가 직책이면;
+
+                                                        cadidateData.setJob(prevMorpheme.getCharacter());
+                                                        if(cadidateData.getOrganization().equals("")&&
+                                                                        (prevWordIdx-1)!=-1){//직책은 탐색되었지만 소속 탐색 안瑛만 한번 더 탐색
+                                                                /**두번째 인덱스 탐색**/
+                                                                prevWordIdx--;
+                                                                prevWord = this.sentenceST.getSentenceStructure().get(prevWordIdx);
+                                                                prevMorpIdx = prevWord.getWord().size()-1;
+                                                                for(;prevMorpIdx>=0;prevMorpIdx--){
+                                                                        prevMorpheme = prevWord.getWord().get(prevMorpIdx);
+                                                                        if(prevMorpheme.getTag().equals("f")&&prevMorpheme.getCharacter().length()!=1){//탐색된 애가 소속이면;
+                                                                                cadidateData.setOrganization(prevMorpheme.getCharacter());
+                                                                                break MorphemeLoop;
+                                                                        }
+                                                                }
+                                                        }else{
+                                                                break MorphemeLoop;
+                                                        }
+                                                }else if(prevMorpheme.getTag().equals("f")&&cadidateData.getOrganization()==""&&prevMorpheme.getCharacter().length()!=1){
+                                                        cadidateData.setOrganization(prevMorpheme.getCharacter());
+                                                        
+                                                        break MorphemeLoop;
+                                                      
+                                                }
+                                        }
+                                }
+                        }
+                }
+
+                return cadidateData;
+        }
 }
