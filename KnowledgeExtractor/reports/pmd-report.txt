@@ -1,0 +1,3 @@
+src/com/KnowledgeExtractor/KnowledgeExtractor.java:182:	Avoid unused local variables such as 'addSeekFlag'.
+src/com/TestCase/testPatternParser.java:10:	Avoid unused imports such as 'com.Entity.Knowledge'
+src/com/TestCase/testPatternParser.java:15:	Avoid unused imports such as 'com.KnowledgeExtractor.KnowledgeExtractor'

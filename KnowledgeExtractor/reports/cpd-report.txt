@@ -1,0 +1,148 @@
+Found a 32 line (199 tokens) duplication in the following files: 
+Starting at line 52 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\Parser\PatternParser.java
+Starting at line 87 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\Parser\PatternParser.java
+
+						mmaToken = new StringTokenizer(token,"+");
+					
+						while(mmaToken.hasMoreTokens()){
+							token = mmaToken.nextToken();
+							if(token.equals("S")){
+								morpheme =new Morpheme(token,"");
+								pattern.setType("S");
+							}else if(token.equals("O")){
+								morpheme =new Morpheme(token,"");
+								pattern.setType("O");
+							}
+							else{
+								tagToken = new StringTokenizer(token, "/");
+								morpheme =new Morpheme(tagToken.nextToken(), tagToken.nextToken());
+								pattern.setPattern(morpheme);
+							}
+						}	
+					}else{
+						if(token.equals("S")){
+							morpheme =new Morpheme(token,"");
+							pattern.setType("S");
+						}else if(token.equals("O")){
+							morpheme =new Morpheme(token,"");
+							pattern.setType("O");
+						}
+						else{
+							tagToken = new StringTokenizer(token, "/");
+							morpheme =new Morpheme(tagToken.nextToken(), tagToken.nextToken());
+							pattern.setPattern(morpheme);
+						}
+					}
+				}
+=====================================================================
+Found a 26 line (156 tokens) duplication in the following files: 
+Starting at line 119 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\KnowledgeExtractor\KnowledgeExtractor.java
+Starting at line 146 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\KnowledgeExtractor\KnowledgeExtractor.java
+
+			}else if(!commentFlag){//현재 탐색하는 부분이 발언 부분이 아닐때
+
+				if(morpheme.getCharacter().equals(Pmorpheme.getCharacter())&&morpheme.getTag().equals(Pmorpheme.getTag())){
+					//탐색된 패턴과 일치하는 문구 삭제
+					nowMorpheme.setCharacter("");
+					nowMorpheme.setTag("");
+					if(this.patternST.Mstatus==0){//패턴의 형태소단위 탐색 끝.
+						if(this.patternST.Pstatus==0){
+							this.patternST.Pstatus = this.defPstatus; //디폴트 값으로 원복
+							this.patternST.Mstatus = this.defMstatus; //디폴트 값으로 원복
+						}else{//패턴 포인터 이동, 패턴의 형태소 포인터 설정.
+							this.patternST.Pstatus--;
+							this.patternST.Mstatus =  this.patternST.getPatternStructure().get(this.patternST.Pstatus)
+									.getPattern().size()-1;
+						}
+						resultPatternMatch = pattern.getType();
+
+						return resultPatternMatch;
+					}else{
+						this.patternST.Mstatus--;
+						return resultPatternMatch;
+					}		
+				}else{
+					return resultPatternMatch;
+				}
+			}
+=====================================================================
+Found a 14 line (90 tokens) duplication in the following files: 
+Starting at line 56 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\Parser\PatternParser.java
+Starting at line 70 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\Parser\PatternParser.java
+Starting at line 90 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\Parser\PatternParser.java
+Starting at line 105 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\Parser\PatternParser.java
+
+							if(token.equals("S")){
+								morpheme =new Morpheme(token,"");
+								pattern.setType("S");
+							}else if(token.equals("O")){
+								morpheme =new Morpheme(token,"");
+								pattern.setType("O");
+							}
+							else{
+								tagToken = new StringTokenizer(token, "/");
+								morpheme =new Morpheme(tagToken.nextToken(), tagToken.nextToken());
+								pattern.setPattern(morpheme);
+							}
+						}	
+					}else{
+=====================================================================
+Found a 2 line (35 tokens) duplication in the following files: 
+Starting at line 236 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\KnowledgeExtractor\KnowledgeExtractor.java
+Starting at line 249 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\KnowledgeExtractor\KnowledgeExtractor.java
+
+						if((nowMorpheme.getTag().equals("NNP")||nowMorpheme.getTag().equals("NNG")||nowMorpheme.getTag().equals("XSN")||
+								nowMorpheme.getTag().equals("JC"))){
+=====================================================================
+Found a 3 line (30 tokens) duplication in the following files: 
+Starting at line 13 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\Parser\PatternParser.java
+Starting at line 23 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\Parser\PatternParser.java
+
+		patternData = patternData.replaceAll("이/JKS", "가/JKS");
+		patternData = patternData.replaceAll("은/JX", "는/JX");
+		patternData = patternData.replaceAll("을/JKO", "를/JKO");
+=====================================================================
+Found a 3 line (29 tokens) duplication in the following files: 
+Starting at line 46 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\Parser\SentenceParser.java
+Starting at line 62 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\Parser\PatternParser.java
+Starting at line 76 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\Parser\PatternParser.java
+Starting at line 96 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\Parser\PatternParser.java
+Starting at line 111 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\Parser\PatternParser.java
+
+			}else{
+				tagToken = new StringTokenizer(token, "/");
+				morpheme=new Morpheme(tagToken.nextToken(), tagToken.nextToken());
+=====================================================================
+Found a 3 line (27 tokens) duplication in the following files: 
+Starting at line 42 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\Parser\SentenceParser.java
+Starting at line 47 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\Parser\SentenceParser.java
+
+					tagToken = new StringTokenizer(token, "/");
+					morpheme=new Morpheme(tagToken.nextToken(), tagToken.nextToken());
+					word.setWord(morpheme);
+=====================================================================
+Found a 11 line (27 tokens) duplication in the following files: 
+Starting at line 238 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\KnowledgeExtractor\KnowledgeExtractor.java
+Starting at line 252 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\KnowledgeExtractor\KnowledgeExtractor.java
+
+							findS.setSentenceStructure(lnowWord);
+							seekFlag = true;
+							//매치되면 형태소 분석 건너뛰고 다음 어절 분석
+							break MorphemeLoop;
+						}else if(seekFlag){//기존에 탐색된게 있으면서 이후 탐색에 실패했으면 찾은 값을 리턴
+							break WordLoop;
+						}else{//아무것도 탐색되지 않음
+							break WordLoop;
+						}	
+					}
+				}else{//일반적인 카테고리에 대한 지식 추출 과정
+=====================================================================
+Found a 2 line (26 tokens) duplication in the following files: 
+Starting at line 42 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\Parser\SentenceParser.java
+Starting at line 64 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\Parser\PatternParser.java
+Starting at line 78 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\Parser\PatternParser.java
+Starting at line 99 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\Parser\PatternParser.java
+Starting at line 113 of C:\Users\Admin\Desktop\Project\WorkSpace\KnowledgeExtractor\src\com\Parser\PatternParser.java
+
+					tagToken = new StringTokenizer(token, "/");
+					morpheme=new Morpheme(tagToken.nextToken(), tagToken.nextToken());

@@ -1,0 +1,9 @@
+발언|S+는/jxc|O+"/sl_고/ncn
+발언|S+는/jxc|O+"/sl+며/ncn
+발언|S+는/jxc|O+"/sl_이라/ncn+이/jp+고/ecc
+발언|S+는/jxc|O+"/sl_라/ncn+이/jp+며/ecc
+발언|S+는/jxc|O+"/sl_이/npd+이/jp+라며/ecs
+발언|S+는/jxc|O+"/sl+이/npd+이/jp+라/ef+고/jcr
+발언|S+는/jxc|O+"/sl_면/ncn+서/jca
+발언|S+는/jxc|O+"/sl_면/nbu+서도/jxc
+발언|S+는/jxc|O+"/sl_라/ncn+이/jp+고/ecc
