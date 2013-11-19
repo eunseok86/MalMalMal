@@ -9,372 +9,291 @@ import com.Entity.CandidatesNQ;
 import com.common.oesLog;
 
 public class CandidatesExtractor {
-	private SentenceStructure sentenceST;
-	private int nowWordIdx, nowMorpIdx, findWordIdx, findMorpIdx;	
-	private Word nowWord; Morpheme nowMorpheme;
+        private SentenceStructure sentenceST;
+        private int nowWordIdx, nowMorpIdx, findWordIdx, findMorpIdx;        
+        private Word nowWord; Morpheme nowMorpheme;
 
 
-	public CandidatesExtractor() {
-		super();
-	}
+        public CandidatesExtractor() {
+                super();
+        }
 
-	public CandidatesExtractor(SentenceStructure ST) {
-		super();
-		this.sentenceST = ST;
+        public CandidatesExtractor(SentenceStructure ST) {
+                super();
+                this.sentenceST = ST;
 
-	}
-
-
-	/**
-	 * ¹ß¾ğÀÚ ÈÄº¸ ÃßÃâ
-	 * - ÀÌ¸§, Á÷Ã¥ ÃßÃâ[ÅÂ±×±â¹İ]
-	 * - Çö ¹®Àå¿¡¼­ ±âÁ¸ ÈÄº¸±ºÀ¸·Î
-	 * - ÀÌ¸§, Á÷Ã¥À¸·Î ÃßÁ¤µÇ´Â ´Ü¾î ÃßÃâ[ÀÌ¸§ ¶Ç´Â Á÷Ã¥±âÁØÀ¸·Î ¾Õ µÚ Å½»ö]
-	 **/
-	public ArrayList<CandidatesNQ> S_CandidatesExtract( ArrayList<CandidatesNQ> candidatesNQarr){
-		nowWordIdx = this.sentenceST.getSentenceStructure().size()-1;//¸¶Áö¸· ÀÎµ¦½º ¿ª¹æÇâ Å½»ö
-		for(;nowWordIdx>=0;nowWordIdx--){//¿öµå[¾îÀı] ´ÜÀ§ Å½»ö
-			nowWord = this.sentenceST.getSentenceStructure().get(nowWordIdx);
-			nowMorpIdx = nowWord.getWord().size()-1;
-			for(;nowMorpIdx>=0;nowMorpIdx--){//ÇüÅÂ¼Ò ´ÜÀ§ Å½»ö
-				nowMorpheme = nowWord.getWord().get(nowMorpIdx);
-
-				//ÀÌ¸§Å½»ö
-				if(nowMorpheme.getTag().equals("nq")&&nowMorpheme.getCharacter().length()>=2&&nowMorpheme.getCharacter().length()<=4){
-					candidatesNQarr = serchName_Job(candidatesNQarr);
-				}
-
-			}	
-		}
-
-		return candidatesNQarr;
-	}
-
-	/**ÀÌ¸§À» ¹ÙÅÁÀ¸·Î SÈÄº¸ ÃßÃâ**/
-	public ArrayList<CandidatesNQ> serchName_Job(ArrayList<CandidatesNQ> candidatesNQarr){
+        }
 
 
-		boolean findFlag=false;
+        /**
+         * ë°œì–¸ì í›„ë³´ ì¶”ì¶œ
+         * - ì´ë¦„, ì§ì±… ì¶”ì¶œ[íƒœê·¸ê¸°ë°˜]
+         * - í˜„ ë¬¸ì¥ì—ì„œ ê¸°ì¡´ í›„ë³´êµ°ìœ¼ë¡œ
+         * - ì´ë¦„, ì§ì±…ìœ¼ë¡œ ì¶”ì •ë˜ëŠ” ë‹¨ì–´ ì¶”ì¶œ[ì´ë¦„ ë˜ëŠ” ì§ì±…ê¸°ì¤€ìœ¼ë¡œ ì• ë’¤ íƒìƒ‰]
+         **/
+        public ArrayList<CandidatesNQ> S_CandidatesExtract( ArrayList<CandidatesNQ> candidatesNQarr){
+                nowWordIdx = this.sentenceST.getSentenceStructure().size()-1;//ë§ˆì§€ë§‰ ì¸ë±ìŠ¤ ì—­ë°©í–¥ íƒìƒ‰
+                for(;nowWordIdx>=0;nowWordIdx--){//ì›Œë“œ[ì–´ì ˆ] ë‹¨ìœ„ íƒìƒ‰
+                        nowWord = this.sentenceST.getSentenceStructure().get(nowWordIdx);
+                        nowMorpIdx = nowWord.getWord().size()-1;
+                        for(;nowMorpIdx>=0;nowMorpIdx--){//í˜•íƒœì†Œ ë‹¨ìœ„ íƒìƒ‰
+                                nowMorpheme = nowWord.getWord().get(nowMorpIdx);
+
+                                //ì´ë¦„íƒìƒ‰
+                                if(nowMorpheme.getTag().equals("nq")&&nowMorpheme.getCharacter().length()>=2&&nowMorpheme.getCharacter().length()<=4){
+                                        candidatesNQarr = serchName_Job(candidatesNQarr);
+                                }
+
+                        }        
+                }
+
+                return candidatesNQarr;
+        }
+
+        /**ì´ë¦„ì„ ë°”íƒ•ìœ¼ë¡œ Sí›„ë³´ ì¶”ì¶œ**/
+        public ArrayList<CandidatesNQ> serchName_Job(ArrayList<CandidatesNQ> candidatesNQarr){
 
 
-		/***
-		 * ¾Õ+ÇüÅÂ¼Ò+µÚ È®ÀÎ[morp´ÜÀ§] 
-		 * -> ÀÌ¸§°ú Á÷Ã¥ÀÌ °ø¹é¾øÀÌ ºÙ¾îÀÖ´ÂÄÉÀÌ½º
-		 * -> ÚÓ´ëÅë·É °°Àº ÄÉÀÌ½º ¸»°í´Â °ÅÀÇ ¾ø´Âµí
-		 * -> ÀÌ ¹æ½ÄÀº º¸·ù
-		 * ¾Õ ÇüÅÂ¼Ò µÚ È®ÀÎ[word´ÜÀ§] 
-		 * -> ¹Ú±ÙÇı ´ëÅë·É °°Àº ÄÉÀÌ½º¸¦ ¹Ú±ÙÇı¶ó´Â ÀÌ¸§ÀÌ µî·ÏµÇ¾î ÀÖÀ¸¸é ¹Ìµî·ÏµÈ Á÷Ã¥À» ÃßÃâ
-		 * -> Á÷Ã¥ÀÇ °æ¿ì ÀÌ¸§Ã³·³ ±æÀÌ·Î ÀÚ¸¦¼ö ¾ø±â¶§¹®¿¡ ÀÏ´ÜÀº µî·ÏµÈ ¾Öµé ±âÁØÀ¸·Î Å½»ö
-		 ***/
-		//±âÁ¸ µ¥ÀÌÅÍ È®ÀÎ
-		findArr:for(int i=0; i < candidatesNQarr.size();i++){
-			if(candidatesNQarr.get(i).getName().equals(nowMorpheme.getCharacter())){
-				if(candidatesNQarr.get(i).getJob()==""){//jobÀÌ ÀÔ·Â ¾ÈµÇÀÖ°í µ¿ÀÏÇÑ ÀÌ¸§ Å½»ö
-					candidatesNQarr.remove(i);
-				}else{
-					findFlag = true;	
-				}
-				break findArr;
-			}
-		}
-
-		if(!findFlag){//±âÁ¸ µ¥ÀÌÅÍ¿¡ ¾øÀ¸¸é Ãß°¡
-			CandidatesNQ cadidateData = new CandidatesNQ(nowMorpheme.getCharacter(), nowWord.getExpIdx());
-			cadidateData = findSeq(cadidateData);
-
-			candidatesNQarr.add(cadidateData);
-
-		}
-
-		return candidatesNQarr;
-	}
+                boolean findFlag=false;
 
 
-	public CandidatesNQ findSeq(CandidatesNQ cadidateData){
-		int prevWordIdx = nowWordIdx-1;
-		int prevMorpIdx;
-		int nextWordIdx = nowWordIdx+1;
-		int nextMorpIdx;
-		Word prevWord;
-		Word nextWord;
+                /***
+                 * ì•+í˜•íƒœì†Œ+ë’¤ í™•ì¸[morpë‹¨ìœ„] 
+                 * -> ì´ë¦„ê³¼ ì§ì±…ì´ ê³µë°±ì—†ì´ ë¶™ì–´ìˆëŠ”ì¼€ì´ìŠ¤
+                 * -> æœ´ëŒ€í†µë ¹ ê°™ì€ ì¼€ì´ìŠ¤ ë§ê³ ëŠ” ê±°ì˜ ì—†ëŠ”ë“¯
+                 * -> ì´ ë°©ì‹ì€ ë³´ë¥˜
+                 * ì• í˜•íƒœì†Œ ë’¤ í™•ì¸[wordë‹¨ìœ„] 
+                 * -> ë°•ê·¼í˜œ ëŒ€í†µë ¹ ê°™ì€ ì¼€ì´ìŠ¤ë¥¼ ë°•ê·¼í˜œë¼ëŠ” ì´ë¦„ì´ ë“±ë¡ë˜ì–´ ìˆìœ¼ë©´ ë¯¸ë“±ë¡ëœ ì§ì±…ì„ ì¶”ì¶œ
+                 * -> ì§ì±…ì˜ ê²½ìš° ì´ë¦„ì²˜ëŸ¼ ê¸¸ì´ë¡œ ìë¥¼ìˆ˜ ì—†ê¸°ë•Œë¬¸ì— ì¼ë‹¨ì€ ë“±ë¡ëœ ì• ë“¤ ê¸°ì¤€ìœ¼ë¡œ íƒìƒ‰
+                 ***/
+                //ê¸°ì¡´ ë°ì´í„° í™•ì¸
+                findArr:for(int i=0; i < candidatesNQarr.size();i++){
+                        if(candidatesNQarr.get(i).getName().equals(nowMorpheme.getCharacter())){
+                                if(candidatesNQarr.get(i).getJob()==""){//jobì´ ì…ë ¥ ì•ˆë˜ìˆê³  ë™ì¼í•œ ì´ë¦„ íƒìƒ‰
+                                        candidatesNQarr.remove(i);
+                                }else{
+                                        findFlag = true;        
+                                }
+                                break findArr;
+                        }
+                }
 
-		if(prevWordIdx!=-1){
-			prevWord = this.sentenceST.getSentenceStructure().get(prevWordIdx);
-			prevMorpIdx = prevWord.getWord().size()-1;
-		}else {
-			prevWord = null;
-			prevMorpIdx=0;
-		}
+                if(!findFlag){//ê¸°ì¡´ ë°ì´í„°ì— ì—†ìœ¼ë©´ ì¶”ê°€
+                        CandidatesNQ cadidateData = new CandidatesNQ(nowMorpheme.getCharacter(), nowWord.getExpIdx());
+                        cadidateData = findSeq(cadidateData);
 
-		if(nextWordIdx!=this.sentenceST.getSentenceStructure().size()){
-			nextWord = this.sentenceST.getSentenceStructure().get(nextWordIdx);
-			nextMorpIdx = nextWord.getWord().size()-1;
-		}else {
-			nextWord = null;
-			nextMorpIdx=0;
-		}
+                        candidatesNQarr.add(cadidateData);
 
-		/**prev now next**/
-		Morpheme prevMorpheme, nextMorpheme;
-		boolean loopFlag = false;
-		if(nextWord!=null){
-			MorphemeLoop:for(;nextMorpIdx>=0;nextMorpIdx--){
-				nextMorpheme = nextWord.getWord().get(nextMorpIdx);
-				if((nextMorpheme.getCharacter().equals("´Â")&&nextMorpheme.getTag().equals("jxc"))
-						||(nextMorpheme.getCharacter().equals("°¡")&&nextMorpheme.getTag().equals("jcs"))
-						||(nextMorpheme.getCharacter().equals("µµ")&&nextMorpheme.getTag().equals("jxc"))
-						||(nextMorpheme.getCharacter().equals("")&&nextMorpheme.getTag().equals(""))
-						){
-					loopFlag = true;
-				}
-				if(nextMorpheme.getTag().equals("ncr")){//Å½»öµÈ ¾Ö°¡ Á÷Ã¥ÀÌ¸é;
-					cadidateData.setJob(nextMorpheme.getCharacter());
-					/**if(cadidateData.getOrganization().equals("")&&
-							(nextWordIdx+1)!=this.sentenceST.getSentenceStructure().size()&&  //Á÷Ã¥Àº Å½»öµÇ¾úÁö¸¸ ¼Ò¼Ó Å½»ö ¾È‰çÀ¸¸é ÇÑ¹ø ´õ Å½»ö
-							!loopFlag){//³¡¿¡ Àº, ´Â, ÀÌ, °¡ µîÀÌ µé¾î°¡ÀÖÀ¸¸é ·çÇÁÁ¾·á
-						µÎ¹øÂ° ÀÎµ¦½º Å½»ö  [Á÷Ã¥ µÚ¿¡´Â ¼Ò¼ÓÀÌ ¿ÀÁö ¾ÊÀ½]
-						nextWordIdx++;
+                }
 
-						nextWord = this.sentenceST.getSentenceStructure().get(nextWordIdx);
-						nextMorpIdx = nextWord.getWord().size()-1;
-						for(;nextMorpIdx>=0;nextMorpIdx--){
-							nextMorpheme = nextWord.getWord().get(nextMorpIdx);
-							if(nextMorpheme.getTag().equals("f")&&nextMorpheme.getCharacter().length()!=1){//Å½»öµÈ ¾Ö°¡ ¼Ò¼ÓÀÌ¸é;
-								cadidateData.setOrganization(nextMorpheme.getCharacter());
-								break MorphemeLoop;
-							}else if(((nextMorpheme.getCharacter().equals("Àü")&&nextMorpheme.getTag().equals("nbn")))&&
-									(nextWordIdx+1)!=this.sentenceST.getSentenceStructure().size()){**/
-								/**ÃÖ´ë 3¹øÂ° ÀÎµ¦½º±îÁö Å½»ö
-								nextWordIdx++;
-								nextWord = this.sentenceST.getSentenceStructure().get(nextWordIdx);
-								nextMorpIdx = nextWord.getWord().size()-1;
-								for(;nextMorpIdx>=0;nextMorpIdx--){
-									nextMorpheme = nextWord.getWord().get(nextMorpIdx);
-									if(nextMorpheme.getTag().equals("f")&&nextMorpheme.getCharacter().length()!=1){
-										cadidateData.setOrganization(nextMorpheme.getCharacter());
-										break MorphemeLoop;
-									}
-								}
-							}
-						}
-					}else{**/
-						break MorphemeLoop;
-					//}
-				}else if(nextMorpheme.getTag().equals("f")&&!loopFlag&&nextMorpheme.getCharacter().length()!=1){
-					cadidateData.setOrganization(nextMorpheme.getCharacter());
-					/**¼Ò¼ÓÀº Å½»öµÇ¾úÁö¸¸ Á÷Ã¥ÀÌ Å½»ö ¾ÈµÇ¾úÀ¸¸é**/
-					if(cadidateData.getJob().equals("")&&(nextWordIdx+1)!=this.sentenceST.getSentenceStructure().size()){
-						/**µÎ¹øÂ° ÀÎµ¦½º Å½»ö**/
-						nextWordIdx++;
-						nextWord = this.sentenceST.getSentenceStructure().get(nextWordIdx);
-						nextMorpIdx = nextWord.getWord().size()-1;
-						for(;nextMorpIdx>=0;nextMorpIdx--){
-							nextMorpheme = nextWord.getWord().get(nextMorpIdx);
-							if(nextMorpheme.getTag().equals("ncr")){//Å½»öµÈ ¾Ö°¡ ¼Ò¼ÓÀÌ¸é;
-								cadidateData.setJob(nextMorpheme.getCharacter());
-								break MorphemeLoop;
-							}else if(((nextMorpheme.getCharacter().equals("Àü")&&nextMorpheme.getTag().equals("nbn")))&&
-									(nextWordIdx+1)!=this.sentenceST.getSentenceStructure().size()){
-								/**ÃÖ´ë 3¹øÂ° ÀÎµ¦½º±îÁö Å½»ö**/
-								nextWordIdx++;
-								nextWord = this.sentenceST.getSentenceStructure().get(nextWordIdx);
-								nextMorpIdx = nextWord.getWord().size()-1;
-								for(;nextMorpIdx>=0;nextMorpIdx--){
-									nextMorpheme = nextWord.getWord().get(nextMorpIdx);
-									if(nextMorpheme.getTag().equals("ncr")){
-										cadidateData.setJob(nextMorpheme.getCharacter());
-										break MorphemeLoop;
-									}
-								}
-							}
-						}
-					}else{
-						break MorphemeLoop;
-					}
-				}
+                return candidatesNQarr;
+        }
 
-				/**Á÷Ã¥, ¼Ò¼Ó Àü¿¡ "Àü"ÀÌ ¸ÕÀú ³ª¿À¸é**/
-				else if((nextMorpheme.getCharacter().equals("Àü")&&nextMorpheme.getTag().equals("nbn"))&&
-						(nextWordIdx+1)!=this.sentenceST.getSentenceStructure().size()){//Àü ´ëÅë·É, Àü ±¹Àú¿øÀå °°Àº ¿¹¿ÜÃ³¸®
-					nextWordIdx++;
-					nextWord = this.sentenceST.getSentenceStructure().get(nextWordIdx);
-					nextMorpIdx = nextWord.getWord().size()-1;
-					for(;nextMorpIdx>=0;nextMorpIdx--){
-						nextMorpheme = nextWord.getWord().get(nextMorpIdx);
-						if(nextMorpheme.getTag().equals("ncr")){//Å½»öµÈ ¾Ö°¡ Á÷Ã¥ÀÌ¸é;
 
-							cadidateData.setJob(nextMorpheme.getCharacter());
-							/**if(cadidateData.getOrganization().equals("")&&  Á÷Ã¥ ´ÙÀ½¿¡ ¼Ò¼ÓÀÌ ¿ÀÁö ¾ÊÀ½[ÀÇ¿ø ¹ÎÁÖ´ç]
-									(nextWordIdx+1)!=this.sentenceST.getSentenceStructure().size()){//Á÷Ã¥Àº Å½»öµÇ¾úÁö¸¸ ¼Ò¼Ó Å½»ö ¾È‰çÀ¸¸é ÇÑ¹ø ´õ Å½»ö
-								µÎ¹øÂ° ÀÎµ¦½º Å½»ö
-								nextWordIdx++;
-								nextWord = this.sentenceST.getSentenceStructure().get(nextWordIdx);
-								nextMorpIdx = nextWord.getWord().size()-1;
-								for(;nextMorpIdx>=0;nextMorpIdx--){
-									nextMorpheme = nextWord.getWord().get(nextMorpIdx);
-									if(nextMorpheme.getTag().equals("f")&&nextMorpheme.getCharacter().length()!=1){//Å½»öµÈ ¾Ö°¡ ¼Ò¼ÓÀÌ¸é;
-										cadidateData.setOrganization(nextMorpheme.getCharacter());
-										break MorphemeLoop;
-									}
-								}
-							}else{**/
-								break MorphemeLoop;
-							//}
-						}else if(nextMorpheme.getTag().equals("f")&&nextMorpheme.getCharacter().length()!=1){
-							cadidateData.setOrganization(nextMorpheme.getCharacter());
-							/**¼Ò¼ÓÀº Å½»öµÇ¾úÁö¸¸ Á÷Ã¥ÀÌ Å½»ö ¾ÈµÇ¾úÀ¸¸é**/
-							if(cadidateData.getJob().equals("")&&(nextWordIdx+1)!=this.sentenceST.getSentenceStructure().size()){
-								/**µÎ¹øÂ° ÀÎµ¦½º Å½»ö**/
-								nextWordIdx++;
-								nextWord = this.sentenceST.getSentenceStructure().get(nextWordIdx);
-								nextMorpIdx = nextWord.getWord().size()-1;
-								for(;nextMorpIdx>=0;nextMorpIdx--){
-									nextMorpheme = nextWord.getWord().get(nextMorpIdx);
-									if(nextMorpheme.getTag().equals("ncr")){//Å½»öµÈ ¾Ö°¡ ¼Ò¼ÓÀÌ¸é;
-										cadidateData.setJob(nextMorpheme.getCharacter());
-										break MorphemeLoop;
-									}
-								}
-							}else{
-								break MorphemeLoop;
-							}
-						}
-					}
-				}
-			}
-		}
+        public CandidatesNQ findSeq(CandidatesNQ cadidateData){
+                int prevWordIdx = nowWordIdx-1;
+                int prevMorpIdx;
+                int nextWordIdx = nowWordIdx+1;
+                int nextMorpIdx;
+                Word prevWord;
+                Word nextWord;
 
-		
-		loopFlag = false;
-		if((cadidateData.getJob()==""||cadidateData.getOrganization()=="")&&prevWord!=null){
-			MorphemeLoop:for(;prevMorpIdx>=0;prevMorpIdx--){
-				prevMorpheme = prevWord.getWord().get(prevMorpIdx);
-				if((prevMorpheme.getCharacter().equals("´Â")&&prevMorpheme.getTag().equals("jxc"))
-						||(prevMorpheme.getCharacter().equals("°¡")&&prevMorpheme.getTag().equals("jcs"))
-						||(prevMorpheme.getCharacter().equals("µµ")&&prevMorpheme.getTag().equals("jxc"))
-						||(prevMorpheme.getCharacter().equals("")&&prevMorpheme.getTag().equals(""))
-						){
-					loopFlag = true;
-				}else if(prevMorpheme.getTag().equals("ncr")&&cadidateData.getJob()==""&&!loopFlag){//Å½»öµÈ ¾Ö°¡ Á÷Ã¥ÀÌ¸é;
-					cadidateData.setJob(prevMorpheme.getCharacter());
-					if(cadidateData.getOrganization().equals("")&&
-							(prevWordIdx-1)!=-1){//Á÷Ã¥Àº Å½»öµÇ¾úÁö¸¸ ¼Ò¼Ó Å½»ö ¾È‰çÀ¸¸é ÇÑ¹ø ´õ Å½»ö
-						/**µÎ¹øÂ° ÀÎµ¦½º Å½»ö**/
-						prevWordIdx--;
-						prevWord = this.sentenceST.getSentenceStructure().get(prevWordIdx);
-						prevMorpIdx = prevWord.getWord().size()-1;
-						for(;prevMorpIdx>=0;prevMorpIdx--){
-							prevMorpheme = prevWord.getWord().get(prevMorpIdx);
-							if(prevMorpheme.getTag().equals("f")&&prevMorpheme.getCharacter().length()!=1){//Å½»öµÈ ¾Ö°¡ ¼Ò¼ÓÀÌ¸é;
-								cadidateData.setOrganization(prevMorpheme.getCharacter());
-								break MorphemeLoop;
-							}else if(((prevMorpheme.getCharacter().equals("Àü")&&prevMorpheme.getTag().equals("nbn")))&&
-									(prevWordIdx-1)!=-1){
-								/**ÃÖ´ë 3¹øÂ° ÀÎµ¦½º±îÁö Å½»ö**/
-								prevWordIdx--;
-								prevWord = this.sentenceST.getSentenceStructure().get(prevWordIdx);
-								prevMorpIdx = prevWord.getWord().size()-1;
-								for(;prevMorpIdx>=0;prevMorpIdx--){
-									prevMorpheme = prevWord.getWord().get(prevMorpIdx);
-									if(prevMorpheme.getTag().equals("f")&&prevMorpheme.getCharacter().length()!=1){
-										cadidateData.setOrganization(prevMorpheme.getCharacter());
-										break MorphemeLoop;
-									}
-								}
-							}
-						}
-					}else{
-						break MorphemeLoop;
-					}
-				}else if(prevMorpheme.getTag().equals("f")&&cadidateData.getOrganization()==""&&!loopFlag&&prevMorpheme.getCharacter().length()!=1){
-					cadidateData.setOrganization(prevMorpheme.getCharacter());
-					/**¼Ò¼ÓÀº Å½»öµÇ¾úÁö¸¸ Á÷Ã¥ÀÌ Å½»ö ¾ÈµÇ¾úÀ¸¸é  [ÀÇ¿ø ¹ÎÁÖ´ç ¿ÀÀº¼®] ÀÌ·±½ÄÀ¸·Î ¿ÀÁø ¾ÊÀ½
-					if(cadidateData.getJob().equals("")&&(prevWordIdx-1)!=-1){**/
-						/**µÎ¹øÂ° ÀÎµ¦½º Å½»ö
-						prevWordIdx--;
-						prevWord = this.sentenceST.getSentenceStructure().get(prevWordIdx);
-						prevMorpIdx = prevWord.getWord().size()-1;
-						for(;prevMorpIdx>=0;prevMorpIdx--){
-							prevMorpheme = prevWord.getWord().get(prevMorpIdx);
-							if(prevMorpheme.getTag().equals("ncr")){//Å½»öµÈ ¾Ö°¡ ¼Ò¼ÓÀÌ¸é;
-								cadidateData.setJob(prevMorpheme.getCharacter());
-								break MorphemeLoop;
-							}else if(((prevMorpheme.getCharacter().equals("Àü")&&prevMorpheme.getTag().equals("nbn")))&&
-									(prevWordIdx-1)!=-1){**/
-								/**ÃÖ´ë 3¹øÂ° ÀÎµ¦½º±îÁö Å½»ö
-								prevWordIdx--;
-								prevWord = this.sentenceST.getSentenceStructure().get(prevWordIdx);
-								prevMorpIdx = prevWord.getWord().size()-1;
-								for(;prevMorpIdx>=0;prevMorpIdx--){
-									prevMorpheme = prevWord.getWord().get(prevMorpIdx);
-									if(prevMorpheme.getTag().equals("ncr")){
-										cadidateData.setJob(prevMorpheme.getCharacter());
-										break MorphemeLoop;
-									}
-								}
-							}
-						}
-					}else{**/
-						break MorphemeLoop;
-					//}
+                if(prevWordIdx!=-1){
+                        prevWord = this.sentenceST.getSentenceStructure().get(prevWordIdx);
+                        prevMorpIdx = prevWord.getWord().size()-1;
+                }else {
+                        prevWord = null;
+                        prevMorpIdx=0;
+                }
+
+                if(nextWordIdx!=this.sentenceST.getSentenceStructure().size()){
+                        nextWord = this.sentenceST.getSentenceStructure().get(nextWordIdx);
+                        nextMorpIdx = nextWord.getWord().size()-1;
+                }else {
+                        nextWord = null;
+                        nextMorpIdx=0;
+                }
+
+                /**prev now next**/
+                Morpheme prevMorpheme, nextMorpheme;
+                boolean loopFlag = false;
+                if(nextWord!=null){
+                        MorphemeLoop:for(;nextMorpIdx>=0;nextMorpIdx--){
+                                nextMorpheme = nextWord.getWord().get(nextMorpIdx);
+                                if((nextMorpheme.getCharacter().equals("ëŠ”")&&nextMorpheme.getTag().equals("jxc"))
+                                                ||(nextMorpheme.getCharacter().equals("ê°€")&&nextMorpheme.getTag().equals("jcs"))
+                                                ||(nextMorpheme.getCharacter().equals("ë„")&&nextMorpheme.getTag().equals("jxc"))
+                                                ||(nextMorpheme.getCharacter().equals("")&&nextMorpheme.getTag().equals(""))
+                                                ){
+                                        loopFlag = true;
+                                }
+                                if(nextMorpheme.getTag().equals("ncr")){//íƒìƒ‰ëœ ì• ê°€ ì§ì±…ì´ë©´;
+                                        cadidateData.setJob(nextMorpheme.getCharacter());
+                                         break MorphemeLoop;
+                                     
+                                }else if(nextMorpheme.getTag().equals("f")&&!loopFlag&&nextMorpheme.getCharacter().length()!=1){
+                                        cadidateData.setOrganization(nextMorpheme.getCharacter());
+                                        /**ì†Œì†ì€ íƒìƒ‰ë˜ì—ˆì§€ë§Œ ì§ì±…ì´ íƒìƒ‰ ì•ˆë˜ì—ˆìœ¼ë©´**/
+                                        if(cadidateData.getJob().equals("")&&(nextWordIdx+1)!=this.sentenceST.getSentenceStructure().size()){
+                                                /**ë‘ë²ˆì§¸ ì¸ë±ìŠ¤ íƒìƒ‰**/
+                                                nextWordIdx++;
+                                                nextWord = this.sentenceST.getSentenceStructure().get(nextWordIdx);
+                                                nextMorpIdx = nextWord.getWord().size()-1;
+                                                for(;nextMorpIdx>=0;nextMorpIdx--){
+                                                        nextMorpheme = nextWord.getWord().get(nextMorpIdx);
+                                                        if(nextMorpheme.getTag().equals("ncr")){//íƒìƒ‰ëœ ì• ê°€ ì†Œì†ì´ë©´;
+                                                                cadidateData.setJob(nextMorpheme.getCharacter());
+                                                                break MorphemeLoop;
+                                                        }else if(((nextMorpheme.getCharacter().equals("ì „")&&nextMorpheme.getTag().equals("nbn")))&&
+                                                                        (nextWordIdx+1)!=this.sentenceST.getSentenceStructure().size()){
+                                                                /**ìµœëŒ€ 3ë²ˆì§¸ ì¸ë±ìŠ¤ê¹Œì§€ íƒìƒ‰**/
+                                                                nextWordIdx++;
+                                                                nextWord = this.sentenceST.getSentenceStructure().get(nextWordIdx);
+                                                                nextMorpIdx = nextWord.getWord().size()-1;
+                                                                for(;nextMorpIdx>=0;nextMorpIdx--){
+                                                                        nextMorpheme = nextWord.getWord().get(nextMorpIdx);
+                                                                        if(nextMorpheme.getTag().equals("ncr")){
+                                                                                cadidateData.setJob(nextMorpheme.getCharacter());
+                                                                                break MorphemeLoop;
+                                                                        }
+                                                                }
+                                                        }
+                                                }
+                                        }else{
+                                                break MorphemeLoop;
+                                        }
+                                }
+
+                                /**ì§ì±…, ì†Œì† ì „ì— "ì „"ì´ ë¨¼ì € ë‚˜ì˜¤ë©´**/
+                                else if((nextMorpheme.getCharacter().equals("ì „")&&nextMorpheme.getTag().equals("nbn"))&&
+                                                (nextWordIdx+1)!=this.sentenceST.getSentenceStructure().size()){//ì „ ëŒ€í†µë ¹, ì „ êµ­ì €ì›ì¥ ê°™ì€ ì˜ˆì™¸ì²˜ë¦¬
+                                        nextWordIdx++;
+                                        nextWord = this.sentenceST.getSentenceStructure().get(nextWordIdx);
+                                        nextMorpIdx = nextWord.getWord().size()-1;
+                                        for(;nextMorpIdx>=0;nextMorpIdx--){
+                                                nextMorpheme = nextWord.getWord().get(nextMorpIdx);
+                                                if(nextMorpheme.getTag().equals("ncr")){//íƒìƒ‰ëœ ì• ê°€ ì§ì±…ì´ë©´;
+
+                                                        cadidateData.setJob(nextMorpheme.getCharacter());
+                                                        
+                                                         break MorphemeLoop;
+                                                        
+                                                }else if(nextMorpheme.getTag().equals("f")&&nextMorpheme.getCharacter().length()!=1){
+                                                        cadidateData.setOrganization(nextMorpheme.getCharacter());
+                                                        /**ì†Œì†ì€ íƒìƒ‰ë˜ì—ˆì§€ë§Œ ì§ì±…ì´ íƒìƒ‰ ì•ˆë˜ì—ˆìœ¼ë©´**/
+                                                        if(cadidateData.getJob().equals("")&&(nextWordIdx+1)!=this.sentenceST.getSentenceStructure().size()){
+                                                                /**ë‘ë²ˆì§¸ ì¸ë±ìŠ¤ íƒìƒ‰**/
+                                                                nextWordIdx++;
+                                                                nextWord = this.sentenceST.getSentenceStructure().get(nextWordIdx);
+                                                                nextMorpIdx = nextWord.getWord().size()-1;
+                                                                for(;nextMorpIdx>=0;nextMorpIdx--){
+                                                                        nextMorpheme = nextWord.getWord().get(nextMorpIdx);
+                                                                        if(nextMorpheme.getTag().equals("ncr")){//íƒìƒ‰ëœ ì• ê°€ ì†Œì†ì´ë©´;
+                                                                                cadidateData.setJob(nextMorpheme.getCharacter());
+                                                                                break MorphemeLoop;
+                                                                        }
+                                                                }
+                                                        }else{
+                                                                break MorphemeLoop;
+                                                        }
+                                                }
+                                        }
+                                }
+                        }
+                }
+
+                
+                loopFlag = false;
+                if((cadidateData.getJob()==""||cadidateData.getOrganization()=="")&&prevWord!=null){
+                        MorphemeLoop:for(;prevMorpIdx>=0;prevMorpIdx--){
+                                prevMorpheme = prevWord.getWord().get(prevMorpIdx);
+                                if((prevMorpheme.getCharacter().equals("ëŠ”")&&prevMorpheme.getTag().equals("jxc"))
+                                                ||(prevMorpheme.getCharacter().equals("ê°€")&&prevMorpheme.getTag().equals("jcs"))
+                                                ||(prevMorpheme.getCharacter().equals("ë„")&&prevMorpheme.getTag().equals("jxc"))
+                                                ||(prevMorpheme.getCharacter().equals("")&&prevMorpheme.getTag().equals(""))
+                                                ){
+                                        loopFlag = true;
+                                }else if(prevMorpheme.getTag().equals("ncr")&&cadidateData.getJob()==""&&!loopFlag){//íƒìƒ‰ëœ ì• ê°€ ì§ì±…ì´ë©´;
+                                        cadidateData.setJob(prevMorpheme.getCharacter());
+                                        if(cadidateData.getOrganization().equals("")&&
+                                                        (prevWordIdx-1)!=-1){//ì§ì±…ì€ íƒìƒ‰ë˜ì—ˆì§€ë§Œ ì†Œì† íƒìƒ‰ ì•ˆÂ‰ç‘›ë§Œ í•œë²ˆ ë” íƒìƒ‰
+                                                /**ë‘ë²ˆì§¸ ì¸ë±ìŠ¤ íƒìƒ‰**/
+                                                prevWordIdx--;
+                                                prevWord = this.sentenceST.getSentenceStructure().get(prevWordIdx);
+                                                prevMorpIdx = prevWord.getWord().size()-1;
+                                                for(;prevMorpIdx>=0;prevMorpIdx--){
+                                                        prevMorpheme = prevWord.getWord().get(prevMorpIdx);
+                                                        if(prevMorpheme.getTag().equals("f")&&prevMorpheme.getCharacter().length()!=1){//íƒìƒ‰ëœ ì• ê°€ ì†Œì†ì´ë©´;
+                                                                cadidateData.setOrganization(prevMorpheme.getCharacter());
+                                                                break MorphemeLoop;
+                                                        }else if(((prevMorpheme.getCharacter().equals("ì „")&&prevMorpheme.getTag().equals("nbn")))&&
+                                                                        (prevWordIdx-1)!=-1){
+                                                                /**ìµœëŒ€ 3ë²ˆì§¸ ì¸ë±ìŠ¤ê¹Œì§€ íƒìƒ‰**/
+                                                                prevWordIdx--;
+                                                                prevWord = this.sentenceST.getSentenceStructure().get(prevWordIdx);
+                                                                prevMorpIdx = prevWord.getWord().size()-1;
+                                                                for(;prevMorpIdx>=0;prevMorpIdx--){
+                                                                        prevMorpheme = prevWord.getWord().get(prevMorpIdx);
+                                                                        if(prevMorpheme.getTag().equals("f")&&prevMorpheme.getCharacter().length()!=1){
+                                                                                cadidateData.setOrganization(prevMorpheme.getCharacter());
+                                                                                break MorphemeLoop;
+                                                                        }
+                                                                }
+                                                        }
+                                                }
+                                        }else{
+                                                break MorphemeLoop;
+                                        }
+                                }else if(prevMorpheme.getTag().equals("f")&&cadidateData.getOrganization()==""&&!loopFlag&&prevMorpheme.getCharacter().length()!=1){
+                                        cadidateData.setOrganization(prevMorpheme.getCharacter());
+                                        
+                                        break MorphemeLoop;
+                                      
 
 
 
-				}else if((
-						((prevMorpheme.getCharacter().equals("Àü")&&prevMorpheme.getTag().equals("nbn"))||
-								(prevMorpheme.getCharacter().equals("¼Ò¼Ó")&&prevMorpheme.getTag().equals("ncn")))
-								&&
-								(cadidateData.getOrganization()==""||cadidateData.getJob()==""))
-								&&(prevWordIdx-1)!=-1){
+                                }else if((
+                                                ((prevMorpheme.getCharacter().equals("ì „")&&prevMorpheme.getTag().equals("nbn"))||
+                                                                (prevMorpheme.getCharacter().equals("ì†Œì†")&&prevMorpheme.getTag().equals("ncn")))
+                                                                &&
+                                                                (cadidateData.getOrganization()==""||cadidateData.getJob()==""))
+                                                                &&(prevWordIdx-1)!=-1){
 
-					prevWordIdx--;
-					prevWord = this.sentenceST.getSentenceStructure().get(prevWordIdx);
-					prevMorpIdx = prevWord.getWord().size()-1;
-					for(;prevMorpIdx>=0;prevMorpIdx--){
-						prevMorpheme = prevWord.getWord().get(prevMorpIdx);
-						if(prevMorpheme.getTag().equals("ncr")&&cadidateData.getJob()==""){//Å½»öµÈ ¾Ö°¡ Á÷Ã¥ÀÌ¸é;
+                                        prevWordIdx--;
+                                        prevWord = this.sentenceST.getSentenceStructure().get(prevWordIdx);
+                                        prevMorpIdx = prevWord.getWord().size()-1;
+                                        for(;prevMorpIdx>=0;prevMorpIdx--){
+                                                prevMorpheme = prevWord.getWord().get(prevMorpIdx);
+                                                if(prevMorpheme.getTag().equals("ncr")&&cadidateData.getJob()==""){//íƒìƒ‰ëœ ì• ê°€ ì§ì±…ì´ë©´;
 
-							cadidateData.setJob(prevMorpheme.getCharacter());
-							if(cadidateData.getOrganization().equals("")&&
-									(prevWordIdx-1)!=-1){//Á÷Ã¥Àº Å½»öµÇ¾úÁö¸¸ ¼Ò¼Ó Å½»ö ¾È‰çÀ¸¸é ÇÑ¹ø ´õ Å½»ö
-								/**µÎ¹øÂ° ÀÎµ¦½º Å½»ö**/
-								prevWordIdx--;
-								prevWord = this.sentenceST.getSentenceStructure().get(prevWordIdx);
-								prevMorpIdx = prevWord.getWord().size()-1;
-								for(;prevMorpIdx>=0;prevMorpIdx--){
-									prevMorpheme = prevWord.getWord().get(prevMorpIdx);
-									if(prevMorpheme.getTag().equals("f")&&prevMorpheme.getCharacter().length()!=1){//Å½»öµÈ ¾Ö°¡ ¼Ò¼ÓÀÌ¸é;
-										cadidateData.setOrganization(prevMorpheme.getCharacter());
-										break MorphemeLoop;
-									}
-								}
-							}else{
-								break MorphemeLoop;
-							}
-						}else if(prevMorpheme.getTag().equals("f")&&cadidateData.getOrganization()==""&&prevMorpheme.getCharacter().length()!=1){
-							cadidateData.setOrganization(prevMorpheme.getCharacter());
-							/**¼Ò¼ÓÀº Å½»öµÇ¾úÁö¸¸ Á÷Ã¥ÀÌ Å½»ö ¾ÈµÇ¾úÀ¸¸é
-							if(cadidateData.getJob().equals("")&&(prevWordIdx-1)!=-1){**/
-								/**µÎ¹øÂ° ÀÎµ¦½º Å½»ö
-								prevWordIdx--;
-								prevWord = this.sentenceST.getSentenceStructure().get(prevWordIdx);
-								prevMorpIdx = prevWord.getWord().size()-1;
-								for(;prevMorpIdx>=0;prevMorpIdx--){
-									prevMorpheme = prevWord.getWord().get(prevMorpIdx);
-									if(prevMorpheme.getTag().equals("ncr")){//Å½»öµÈ ¾Ö°¡ ¼Ò¼ÓÀÌ¸é;
-										cadidateData.setJob(prevMorpheme.getCharacter());
-										break MorphemeLoop;
-									}
-								}
-							}else{**/
-								break MorphemeLoop;
-							//}
-						}
-					}
-				}
-			}
-		}
+                                                        cadidateData.setJob(prevMorpheme.getCharacter());
+                                                        if(cadidateData.getOrganization().equals("")&&
+                                                                        (prevWordIdx-1)!=-1){//ì§ì±…ì€ íƒìƒ‰ë˜ì—ˆì§€ë§Œ ì†Œì† íƒìƒ‰ ì•ˆÂ‰ç‘›ë§Œ í•œë²ˆ ë” íƒìƒ‰
+                                                                /**ë‘ë²ˆì§¸ ì¸ë±ìŠ¤ íƒìƒ‰**/
+                                                                prevWordIdx--;
+                                                                prevWord = this.sentenceST.getSentenceStructure().get(prevWordIdx);
+                                                                prevMorpIdx = prevWord.getWord().size()-1;
+                                                                for(;prevMorpIdx>=0;prevMorpIdx--){
+                                                                        prevMorpheme = prevWord.getWord().get(prevMorpIdx);
+                                                                        if(prevMorpheme.getTag().equals("f")&&prevMorpheme.getCharacter().length()!=1){//íƒìƒ‰ëœ ì• ê°€ ì†Œì†ì´ë©´;
+                                                                                cadidateData.setOrganization(prevMorpheme.getCharacter());
+                                                                                break MorphemeLoop;
+                                                                        }
+                                                                }
+                                                        }else{
+                                                                break MorphemeLoop;
+                                                        }
+                                                }else if(prevMorpheme.getTag().equals("f")&&cadidateData.getOrganization()==""&&prevMorpheme.getCharacter().length()!=1){
+                                                        cadidateData.setOrganization(prevMorpheme.getCharacter());
+                                                        
+                                                        break MorphemeLoop;
+                                                      
+                                                }
+                                        }
+                                }
+                        }
+                }
 
-		return cadidateData;
-	}
+                return cadidateData;
+        }
 }
